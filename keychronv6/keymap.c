@@ -25,8 +25,9 @@ enum layers{
 };
 
 enum custom_keycodes {
-    QMKCIRCLE = SAFE_RANGE,
-    QMKSQUARE
+    QMK_SCR = SAFE_RANGE,
+    QMK_RUN,
+    QMK_DEBUG
 };
 
 #define KC_TASK LGUI(KC_TAB)
@@ -67,7 +68,7 @@ enum custom_keycodes {
 const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
     [_LAYER_0] = LAYOUT_iso_110(
 
-        KC_ESC,   KC_F1,    KC_F2,    KC_F3,    KC_F4,    KC_F5,    KC_F6,   KC_F7,    KC_F8,    KC_F9,    KC_F10,   KC_F11,   KC_F12,   KC_MUTE,  KC_PSCR, KC_SCRL, KC_PAUS,    QMKCIRCLE, MO(1),    QMKSQUARE, KC_TRNS,
+        KC_ESC,   KC_F1,    KC_F2,    KC_F3,    KC_F4,    KC_F5,    KC_F6,   KC_F7,    KC_F8,    KC_F9,    KC_F10,   KC_F11,   KC_F12,   KC_MUTE,  KC_PSCR, KC_SCRL, KC_PAUS,    MO(1),     QMK_RUN,  QMK_DEBUG, QMK_SCR,
         KC_GRV,   KC_1,     KC_2,     KC_3,     KC_4,     KC_5,     KC_6,    KC_7,     KC_8,     KC_9,     KC_0,     KC_MINS,  KC_EQL,   KC_BSPC,  KC_INS,  KC_HOME, KC_PGUP,    KC_NUM,    KC_PSLS,  KC_PAST,   KC_PMNS,
         KC_TAB,   KC_Q,     KC_W,     KC_E,     KC_R,     KC_T,     KC_Y,    KC_U,     KC_I,     KC_O,     KC_P,     KC_LBRC,  KC_RBRC,            KC_DEL,  KC_END,  KC_PGDN,    KC_P7,     KC_P8,    KC_P9,
         KC_CAPS,  KC_A,     KC_S,     KC_D,     KC_F,     KC_G,     KC_H,    KC_J,     KC_K,     KC_L,     KC_SCLN,  KC_QUOT,  KC_NUHS,  KC_ENT,                                 KC_P4,     KC_P5,    KC_P6,     KC_PPLS,
@@ -81,7 +82,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
         _______,  RGB_MOD,  RGB_VAI,  RGB_HUI,  RGB_SAI,  RGB_SPI,  _______, _______,  _______,  _______,  _______,  _______,  _______,            _______, _______, _______,    _______,   _______,  _______,
         _______,  RGB_RMOD, RGB_VAD,  RGB_HUD,  RGB_SAD,  RGB_SPD,  _______, _______,  _______,  _______,  _______,  _______,  _______,  _______,                                _______,   _______,  _______,   _______,
         _______,  _______,  _______,  _______,  _______,  _______,  _______, NK_TOGG,  _______,  _______,  _______,  _______,  _______,                     _______,             _______,   _______,  _______,
-        _______,  _______,  _______,  _______,                      _______,                               _______,  _______,  _______,  _______,  _______, _______, _______,                         _______, _______
+        _______,  _______,  _______,  _______,                      _______,                               _______,  _______,  _______,  _______,  _______, _______, _______,                         _______,   _______
     )
 };
 
@@ -93,18 +94,17 @@ const uint16_t PROGMEM encoder_map[][NUM_ENCODERS][NUM_DIRECTIONS] = {
 #endif
 
 void enable_debug_mode(void) {
-    #if defined(CONSOLE_ENABLE)
-    #if defined(COMMAND_ENABLE)
+#if defined(CONSOLE_ENABLE)
+#if defined(COMMAND_ENABLE)
     debug_enable=true;
     debug_matrix=true;
-    #endif
-    #endif
+#endif
+#endif
 }
 
 void setup_default_rgb(void) {
     // Set RGB to known state
     rgb_matrix_enable_noeeprom();
-    rgb_matrix_set_color_all(RGB_YELLOW);
     rgb_matrix_mode_noeeprom(RGB_MATRIX_SOLID_COLOR);
 }
 
@@ -117,15 +117,18 @@ void keyboard_post_init_user(void) {
 // Macros
 bool process_record_user(uint16_t keycode, keyrecord_t *record) {
     switch (keycode) {
-    case QMKSQUARE:
+    case QMK_RUN:
         if (record->event.pressed) {
-            // when keycode QMKSQUARE is pressed
             SEND_STRING(SS_LSFT(SS_TAP(X_F10)));
         }
         break;
-    case QMKCIRCLE:
+    case QMK_DEBUG:
         if (record->event.pressed) {
-            // when keycode QMKCIRCLE is pressed
+            SEND_STRING(SS_LSFT(SS_TAP(X_F9)));
+        }
+        break;
+    case QMK_SCR:
+        if (record->event.pressed) {
             SEND_STRING(SS_LCTL(SS_LSFT(SS_TAP(X_PSCR))));
         }
         break;
@@ -144,23 +147,29 @@ void set_key_color(uint8_t layer, led_t* led_state, uint8_t row, uint8_t col, ui
         }
     }
 
-    // Regardless of the layer, if the keycode is QK_BOOT paint it red
-    if (keycode == QK_BOOT) {
+    switch (keycode) {
+    case QMK_SCR:
+        rgb_matrix_set_color(index, RGB_PURPLE);
+        break;
+    case QMK_RUN:
+        rgb_matrix_set_color(index, RGB_GREEN);
+        break;
+    case QMK_DEBUG:
+        rgb_matrix_set_color(index, RGB_ORANGE);
+        break;
+    case QK_BOOT:
         rgb_matrix_set_color(index, RGB_RED);
-    }
-
-    // If the caps lock is enabled and the led is the caps lock one, paint it red
-    if (keycode == KC_CAPS) {
+        break;
+    case KC_CAPS:
         if (led_state->caps_lock) {
             rgb_matrix_set_color(index, RGB_RED);
         }
-    }
-
-    // If the num lock is disabled and the key is the NUM_LOCK one, disable the led
-    if (keycode == KC_NUM) {
+        break;
+    case KC_NUM:
         if (!led_state->num_lock) {
             rgb_matrix_set_color(index, RGB_OFF);
         }
+    default: break;
     }
 }
 
