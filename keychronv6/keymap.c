@@ -16,6 +16,7 @@
 
 #include QMK_KEYBOARD_H
 #include "action_layer.h"
+#include "print.h"
 
 // clang-format off
 
@@ -25,9 +26,9 @@ enum layers{
 };
 
 enum custom_keycodes {
-    QMK_SCR = SAFE_RANGE,
-    QMK_RUN,
-    QMK_DEBUG
+    QMK_TRI = SAFE_RANGE,
+    QMK_SQUAR,
+    QMK_CROSS
 };
 
 #define KC_TASK LGUI(KC_TAB)
@@ -68,7 +69,7 @@ enum custom_keycodes {
 const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
     [_LAYER_0] = LAYOUT_iso_110(
 
-        KC_ESC,   KC_F1,    KC_F2,    KC_F3,    KC_F4,    KC_F5,    KC_F6,   KC_F7,    KC_F8,    KC_F9,    KC_F10,   KC_F11,   KC_F12,   KC_MUTE,  KC_PSCR, KC_SCRL, KC_PAUS,    MO(1),     QMK_RUN,  QMK_DEBUG, QMK_SCR,
+        KC_ESC,   KC_F1,    KC_F2,    KC_F3,    KC_F4,    KC_F5,    KC_F6,   KC_F7,    KC_F8,    KC_F9,    KC_F10,   KC_F11,   KC_F12,   KC_MUTE,  KC_PSCR, KC_SCRL, KC_PAUS,    TG(1),     QMK_TRI,  QMK_SQUAR, QMK_CROSS,
         KC_GRV,   KC_1,     KC_2,     KC_3,     KC_4,     KC_5,     KC_6,    KC_7,     KC_8,     KC_9,     KC_0,     KC_MINS,  KC_EQL,   KC_BSPC,  KC_INS,  KC_HOME, KC_PGUP,    KC_NUM,    KC_PSLS,  KC_PAST,   KC_PMNS,
         KC_TAB,   KC_Q,     KC_W,     KC_E,     KC_R,     KC_T,     KC_Y,    KC_U,     KC_I,     KC_O,     KC_P,     KC_LBRC,  KC_RBRC,            KC_DEL,  KC_END,  KC_PGDN,    KC_P7,     KC_P8,    KC_P9,
         KC_CAPS,  KC_A,     KC_S,     KC_D,     KC_F,     KC_G,     KC_H,    KC_J,     KC_K,     KC_L,     KC_SCLN,  KC_QUOT,  KC_NUHS,  KC_ENT,                                 KC_P4,     KC_P5,    KC_P6,     KC_PPLS,
@@ -114,23 +115,96 @@ void keyboard_post_init_user(void) {
     setup_default_rgb();
 }
 
+// HID
+#define COMMAND_CURRENT_PROGRAM 1
+#define CURRENT_PROGRAM_DEFAULT 0
+#define CURRENT_PROGRAM_ANDROID_STUDIO 1
+#define CURRENT_PROGRAM_CHROME 2
+#define CURRENT_PROGRAM_RUST_ROVER 3
+#define CURRENT_PROGRAM_CLION 4
+#define CURRENT_PROGRAM_SLACK 5
+
+uint8_t current_program = CURRENT_PROGRAM_DEFAULT;
+
+bool is_current_program_jetbrains(void) {
+    switch (current_program) {
+        case CURRENT_PROGRAM_ANDROID_STUDIO:
+        case CURRENT_PROGRAM_RUST_ROVER:
+            return true;
+    }
+    return false;
+}
+
+void raw_hid_receive(uint8_t *data, uint8_t length) {
+    uint8_t command = data[0];
+    uint8_t payload = data[1];
+    switch (command) {
+        case COMMAND_CURRENT_PROGRAM:
+            current_program = payload;
+            break;
+    }
+}
+
 // Macros
+void send_emoji(const char* emoji) {
+    SEND_STRING(SS_LSFT(SS_TAP(X_DOT)));
+    send_string(emoji);
+    SEND_STRING(SS_LSFT(SS_TAP(X_DOT)));
+}
+
+void on_triangle_press(uint8_t layer, bool pressed) {
+    if (layer != _LAYER_0) return;
+    switch (current_program) {
+        case CURRENT_PROGRAM_ANDROID_STUDIO:
+        case CURRENT_PROGRAM_RUST_ROVER:
+        case CURRENT_PROGRAM_CLION:
+            if (pressed) {
+                SEND_STRING(SS_LSFT(SS_TAP(X_F10)));
+            }
+            break;
+        case CURRENT_PROGRAM_SLACK:
+            if (pressed) {
+                send_emoji("joy");
+            }
+            break;
+    }
+}
+
+void on_square_press(uint8_t layer, bool pressed) {
+    if (layer != _LAYER_0) return;
+    switch (current_program) {
+        case CURRENT_PROGRAM_ANDROID_STUDIO:
+        case CURRENT_PROGRAM_RUST_ROVER:
+            if (pressed) {
+                SEND_STRING(SS_LSFT(SS_TAP(X_F9)));
+            }
+            break;
+        case CURRENT_PROGRAM_SLACK:
+            if (pressed) {
+                send_emoji("tada");
+            }
+            break;
+    }
+}
+
+void on_cross_press(uint8_t layer, bool pressed) {
+    if (layer != _LAYER_0) return;
+    if (!pressed) return;
+    SEND_STRING(SS_LCTL(SS_LSFT(SS_TAP(X_PSCR))));
+}
+
 bool process_record_user(uint16_t keycode, keyrecord_t *record) {
+    uint8_t layer = get_highest_layer(layer_state);
+    bool pressed = record->event.pressed;
     switch (keycode) {
-    case QMK_RUN:
-        if (record->event.pressed) {
-            SEND_STRING(SS_LSFT(SS_TAP(X_F10)));
-        }
+    case QMK_TRI:
+        on_triangle_press(layer, pressed);
         break;
-    case QMK_DEBUG:
-        if (record->event.pressed) {
-            SEND_STRING(SS_LSFT(SS_TAP(X_F9)));
-        }
+    case QMK_SQUAR:
+        on_square_press(layer, pressed);
         break;
-    case QMK_SCR:
-        if (record->event.pressed) {
-            SEND_STRING(SS_LCTL(SS_LSFT(SS_TAP(X_PSCR))));
-        }
+    case QMK_CROSS:
+        on_cross_press(layer, pressed);
         break;
     }
     return true;
@@ -148,14 +222,26 @@ void set_key_color(uint8_t layer, led_t* led_state, uint8_t row, uint8_t col, ui
     }
 
     switch (keycode) {
-    case QMK_SCR:
+    case QMK_TRI:
+        if (layer == _LAYER_0) {
+            if (is_current_program_jetbrains()) {
+                rgb_matrix_set_color(index, RGB_GREEN);
+            } else if (current_program == CURRENT_PROGRAM_SLACK) {
+                rgb_matrix_set_color(index, RGB_YELLOW);
+            }
+        }
+        break;
+    case QMK_SQUAR:
+        if (layer == _LAYER_0) {
+            if (is_current_program_jetbrains()) {
+                rgb_matrix_set_color(index, RGB_ORANGE);
+            } else if (current_program == CURRENT_PROGRAM_SLACK) {
+                rgb_matrix_set_color(index, RGB_PINK);
+            }
+        }
+        break;
+    case QMK_CROSS:
         rgb_matrix_set_color(index, RGB_PURPLE);
-        break;
-    case QMK_RUN:
-        rgb_matrix_set_color(index, RGB_GREEN);
-        break;
-    case QMK_DEBUG:
-        rgb_matrix_set_color(index, RGB_ORANGE);
         break;
     case QK_BOOT:
         rgb_matrix_set_color(index, RGB_RED);
@@ -187,3 +273,4 @@ bool rgb_matrix_indicators_advanced_user(uint8_t led_min, uint8_t led_max) {
 
     return false;
 }
+
