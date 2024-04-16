@@ -47,6 +47,7 @@ enum custom_keycodes {
 #define CURRENT_PROGRAM_RUST_ROVER 3
 #define CURRENT_PROGRAM_CLION 4
 #define CURRENT_PROGRAM_SLACK 5
+#define CURRENT_PROGRAM_PHPSTORM 6
 
 
 const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
@@ -101,6 +102,8 @@ bool on_current_program(uint8_t program) {
 bool is_current_program_jetbrains(void) {
     switch (current_program) {
         case CURRENT_PROGRAM_ANDROID_STUDIO:
+        case CURRENT_PROGRAM_CLION:
+        case CURRENT_PROGRAM_PHPSTORM:
         case CURRENT_PROGRAM_RUST_ROVER:
             return true;
     }
