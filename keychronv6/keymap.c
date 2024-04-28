@@ -134,6 +134,7 @@ void on_triangle_press(uint8_t layer, bool pressed) {
     switch (current_program) {
         case CURRENT_PROGRAM_ANDROID_STUDIO:
         case CURRENT_PROGRAM_RUST_ROVER:
+        case CURRENT_PROGRAM_PHPSTORM:
         case CURRENT_PROGRAM_CLION:
             if (pressed) {
                 SEND_STRING(SS_LSFT(SS_TAP(X_F10)));
@@ -151,6 +152,7 @@ void on_square_press(uint8_t layer, bool pressed) {
     if (layer != _LAYER_0) return;
     switch (current_program) {
         case CURRENT_PROGRAM_ANDROID_STUDIO:
+        case CURRENT_PROGRAM_PHPSTORM:
         case CURRENT_PROGRAM_RUST_ROVER:
             if (pressed) {
                 SEND_STRING(SS_LSFT(SS_TAP(X_F9)));
