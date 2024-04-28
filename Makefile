@@ -28,13 +28,13 @@ build: ## Build firmware
 	@cd qmk && qmk compile
 
 .PHONY: flash-v6
-flash-v6: ## Flash firmware
+flash-v6: ## Flash firmware (V6)
 	@qmk flash qmk/keychron_v6_iso_encoder_cquintana92.bin
 
 .PHONY: flash-q11
-flash-q11: ## Flash firmware
+flash-q11: ## Flash firmware (Q11)
 	@qmk flash qmk/keychron_q11_iso_encoder_cquintana92.bin
 
 .PHONY: help
 help: ## Display this help screen
-	@grep -h -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'
+	@grep -h -E '^[a-zA-Z0-9_-]+:.*?## .*$$' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'
