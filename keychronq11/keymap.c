@@ -117,7 +117,7 @@ bool is_current_program_jetbrains(void) {
 // Init function
 void keyboard_post_init_user(void) {
     enable_debug_mode();
-    //setup_default_rgb();
+    setup_default_rgb();
     qmkontext_init();
     qmkontext_register_callback(COMMAND_CURRENT_PROGRAM, on_current_program);
 }
