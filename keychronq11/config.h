@@ -1,0 +1,7 @@
+#pragma once
+
+#define SPLIT_USB_DETECT
+#define MASTER_LEFT
+#define SPLIT_LAYER_STATE_ENABLE
+#define SPLIT_LED_STATE_ENABLE
+#define SPLIT_MODS_ENABLE
