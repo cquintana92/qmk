@@ -33,7 +33,8 @@ enum custom_keycodes {
     MACRO_2,
     MACRO_3,
     MACRO_4,
-    MACRO_5
+    MACRO_5,
+    QMK_CMT,
 };
 
 #define KC_TASK LGUI(KC_TAB)
@@ -66,8 +67,8 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
        QK_BOOT,         _______,  _______,  _______,  _______,            _______,                       _______,            _______,  _______,    _______,  _______,  _______,  _______),
 
    [_LAYER_MOV] = LAYOUT_92_iso(
-       _______,         _______,  _______,  _______,  _______,  _______,  _______,   _______,  _______,  _______,  _______,  _______,  _______,    _______,  _______,  _______,  _______,
-       _______,         _______,  _______,  _______,  _______,  _______,  _______,   _______,  _______,  _______,  _______,  _______,  _______,    _______,  _______,            _______,
+       _______,         _______,  _______,  _______,  _______,  _______,  _______,   _______,  _______,  _______,  _______,  _______,  _______,    _______,  KC_PSCR,  _______,  _______,
+       _______,         _______,  _______,  _______,  _______,  _______,  _______,   _______,  QMK_CMT,  _______,  _______,  _______,  _______,    _______,  _______,            _______,
        _______,         _______,  _______,  _______,  _______,  _______,  _______,   _______,  _______,  _______,  _______,  _______,  _______,    _______,                      _______,
        _______,         _______,  _______,  _______,  _______,  _______,  _______,   _______,  _______,  _______,  _______,  _______,  _______,    _______,  _______,            _______,
        KC_LSFT,         _______,  _______,  _______,  _______,  _______,  _______,   _______,  _______,  _______,  _______,  _______,  _______,              _______,  _______,
@@ -201,6 +202,11 @@ void on_m5_pressed(uint8_t layer, bool pressed) {
     }
 }
 
+void on_comment_pressed(bool pressed) {
+    if (!pressed) return;
+    SEND_STRING(SS_LCTL(SS_LSFT(SS_TAP(X_PSLS))));
+}
+
 bool process_record_user(uint16_t keycode, keyrecord_t *record) {
     uint8_t layer = get_highest_layer(layer_state);
     bool pressed = record->event.pressed;
@@ -220,6 +226,9 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
     case MACRO_5:
         on_m5_pressed(layer, pressed);
         break;
+    case QMK_CMT:
+        on_comment_pressed(pressed);
+        break;
     }
     return true;
 };
@@ -237,7 +246,11 @@ void set_key_color(uint8_t layer, led_t* led_state, uint8_t row, uint8_t col, ui
 
     // If LAYER1 and the key has a keycode, paint it green
     if (layer == _LAYER_MOV) {
-        rgb_matrix_set_color(index, RGB_BLUE);
+        if (keycode > KC_TRNS) {
+            rgb_matrix_set_color(index, RGB_GREEN);
+        } else {
+            rgb_matrix_set_color(index, RGB_BLUE);
+        }
         return;
     }
 
