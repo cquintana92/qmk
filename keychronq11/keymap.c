@@ -204,7 +204,7 @@ void on_m5_pressed(uint8_t layer, bool pressed) {
 
 void on_comment_pressed(bool pressed) {
     if (!pressed) return;
-    SEND_STRING(SS_LCTL(SS_LSFT(SS_TAP(X_PSLS))));
+    SEND_STRING(SS_LCTL(SS_TAP(X_PSLS)));
 }
 
 bool process_record_user(uint16_t keycode, keyrecord_t *record) {
