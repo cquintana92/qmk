@@ -1,25 +1,24 @@
 /* Copyright 2023 @ Keychron (https://www.keychron.com)
-*
-* This program is free software: you can redistribute it and/or modify
-* it under the terms of the GNU General Public License as published by
-* the Free Software Foundation, either version 2 of the License, or
-* (at your option) any later version.
-*
-* This program is distributed in the hope that it will be useful,
-* but WITHOUT ANY WARRANTY; without even the implied warranty of
-* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-* GNU General Public License for more details.
-*
-* You should have received a copy of the GNU General Public License
-* along with this program.  If not, see <http://www.gnu.org/licenses/>.
-*/
-
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
 
 #include QMK_KEYBOARD_H
 
 #include "/usr/share/qmkontext/qmkontext.h"
 
-enum layers{
+enum layers {
     _LAYER_0,
     _LAYER_1,
     _LAYER_MOV,
@@ -97,8 +96,8 @@ const uint16_t PROGMEM encoder_map[][NUM_DIRECTIONS][NUM_DIRECTIONS] = {
 void enable_debug_mode(void) {
 #if defined(CONSOLE_ENABLE)
 #if defined(COMMAND_ENABLE)
-    debug_enable=true;
-    debug_matrix=true;
+    debug_enable = true;
+    debug_matrix = true;
 #endif
 #endif
 }
@@ -146,11 +145,11 @@ void on_keyboard_idle(void) {
 }
 
 void matrix_scan_user(void) {
-  if (idle_timer && timer_expired(timer_read(), idle_timer)) {
-    // If execution reaches here, the keyboard has gone idle.
-    on_keyboard_idle();
-    idle_timer = 0;
-  }
+    if (idle_timer && timer_expired(timer_read(), idle_timer)) {
+        // If execution reaches here, the keyboard has gone idle.
+        on_keyboard_idle();
+        idle_timer = 0;
+    }
 }
 
 // END: IDLE RGB
@@ -247,43 +246,43 @@ void on_comment_pressed(bool pressed) {
     SEND_STRING(SS_LCTL(SS_TAP(X_PSLS)));
 }
 
-bool process_record_user(uint16_t keycode, keyrecord_t *record) {
+bool process_record_user(uint16_t keycode, keyrecord_t* record) {
     on_keyboard_event(record);
 
     uint8_t layer = get_highest_layer(layer_state);
     bool pressed = record->event.pressed;
     switch (keycode) {
-    case MACRO_1:
-        on_m1_pressed(layer, pressed);
-        break;
-    case MACRO_2:
-        on_m2_pressed(layer, pressed);
-        break;
-    case MACRO_3:
-        on_m3_pressed(layer, pressed);
-        break;
-    case MACRO_4:
-        on_m4_pressed(layer, pressed);
-        break;
-    case MACRO_5:
-        on_m5_pressed(layer, pressed);
-        break;
-    case QMK_CMT:
-        on_comment_pressed(pressed);
-        break;
+        case MACRO_1:
+            on_m1_pressed(layer, pressed);
+            break;
+        case MACRO_2:
+            on_m2_pressed(layer, pressed);
+            break;
+        case MACRO_3:
+            on_m3_pressed(layer, pressed);
+            break;
+        case MACRO_4:
+            on_m4_pressed(layer, pressed);
+            break;
+        case MACRO_5:
+            on_m5_pressed(layer, pressed);
+            break;
+        case QMK_CMT:
+            on_comment_pressed(pressed);
+            break;
     }
     return true;
 }
 
 // RGB
 void set_key_color(uint8_t layer, led_t* led_state, uint8_t row, uint8_t col, uint8_t index) {
-    uint16_t keycode = keymap_key_to_keycode(layer, (keypos_t){col,row});
+    uint16_t keycode = keymap_key_to_keycode(layer, (keypos_t){col, row});
 
     // SPECIAL KEY CODES
     switch (keycode) {
         case QK_BOOT:
-        rgb_matrix_sethsv(HSV_RED);
-        return;
+            rgb_matrix_sethsv(HSV_RED);
+            return;
     }
 
     // If LAYER1 and the key has a keycode, paint it green
@@ -356,7 +355,6 @@ void set_key_color(uint8_t layer, led_t* led_state, uint8_t row, uint8_t col, ui
 static bool is_cycle_set = false;
 static bool is_solid_set = false;
 
-
 bool rgb_matrix_indicators_advanced_user(uint8_t led_min, uint8_t led_max) {
     // Check if is idle
     if (IS_LAYER_ON(_LAYER_IDLE)) {
@@ -389,4 +387,3 @@ bool rgb_matrix_indicators_advanced_user(uint8_t led_min, uint8_t led_max) {
 
     return false;
 }
-
