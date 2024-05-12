@@ -15,18 +15,16 @@
  */
 
 #include QMK_KEYBOARD_H
+#include "/usr/share/qmkontext/qmkontext.h"
 #include "action_layer.h"
 #include "print.h"
-#include "/usr/share/qmkontext/qmkontext.h"
 
 enum {
     CURRENT_PROGRAM,
     MAX_COMMAND
 } qmkontext_commands;
 
-// clang-format off
-
-enum layers{
+enum layers {
     _LAYER_0,
     _LAYER_1
 };
@@ -49,6 +47,7 @@ enum custom_keycodes {
 #define CURRENT_PROGRAM_SLACK 5
 #define CURRENT_PROGRAM_PHPSTORM 6
 
+// clang-format off
 
 const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
     [_LAYER_0] = LAYOUT_iso_110(
@@ -78,11 +77,13 @@ const uint16_t PROGMEM encoder_map[][NUM_ENCODERS][NUM_DIRECTIONS] = {
 };
 #endif
 
+// clang-format on
+
 void enable_debug_mode(void) {
 #if defined(CONSOLE_ENABLE)
 #if defined(COMMAND_ENABLE)
-    debug_enable=true;
-    debug_matrix=true;
+    debug_enable = true;
+    debug_matrix = true;
 #endif
 #endif
 }
@@ -172,26 +173,26 @@ void on_cross_press(uint8_t layer, bool pressed) {
     SEND_STRING(SS_LCTL(SS_LSFT(SS_TAP(X_PSCR))));
 }
 
-bool process_record_user(uint16_t keycode, keyrecord_t *record) {
+bool process_record_user(uint16_t keycode, keyrecord_t* record) {
     uint8_t layer = get_highest_layer(layer_state);
     bool pressed = record->event.pressed;
     switch (keycode) {
-    case QMK_TRI:
-        on_triangle_press(layer, pressed);
-        break;
-    case QMK_SQUAR:
-        on_square_press(layer, pressed);
-        break;
-    case QMK_CROSS:
-        on_cross_press(layer, pressed);
-        break;
+        case QMK_TRI:
+            on_triangle_press(layer, pressed);
+            break;
+        case QMK_SQUAR:
+            on_square_press(layer, pressed);
+            break;
+        case QMK_CROSS:
+            on_cross_press(layer, pressed);
+            break;
     }
     return true;
 };
 
 // RGB
 void set_key_color(uint8_t layer, led_t* led_state, uint8_t row, uint8_t col, uint8_t index) {
-    uint16_t keycode = keymap_key_to_keycode(layer, (keypos_t){col,row});
+    uint16_t keycode = keymap_key_to_keycode(layer, (keypos_t){col, row});
 
     // If LAYER1 and the key has a keycode, paint it green
     if (layer == _LAYER_1) {
@@ -201,40 +202,41 @@ void set_key_color(uint8_t layer, led_t* led_state, uint8_t row, uint8_t col, ui
     }
 
     switch (keycode) {
-    case QMK_TRI:
-        if (layer == _LAYER_0) {
-            if (is_current_program_jetbrains()) {
-                rgb_matrix_set_color(index, RGB_GREEN);
-            } else if (current_program == CURRENT_PROGRAM_SLACK) {
-                rgb_matrix_set_color(index, RGB_YELLOW);
+        case QMK_TRI:
+            if (layer == _LAYER_0) {
+                if (is_current_program_jetbrains()) {
+                    rgb_matrix_set_color(index, RGB_GREEN);
+                } else if (current_program == CURRENT_PROGRAM_SLACK) {
+                    rgb_matrix_set_color(index, RGB_YELLOW);
+                }
             }
-        }
-        break;
-    case QMK_SQUAR:
-        if (layer == _LAYER_0) {
-            if (is_current_program_jetbrains()) {
-                rgb_matrix_set_color(index, RGB_ORANGE);
-            } else if (current_program == CURRENT_PROGRAM_SLACK) {
-                rgb_matrix_set_color(index, RGB_PINK);
+            break;
+        case QMK_SQUAR:
+            if (layer == _LAYER_0) {
+                if (is_current_program_jetbrains()) {
+                    rgb_matrix_set_color(index, RGB_ORANGE);
+                } else if (current_program == CURRENT_PROGRAM_SLACK) {
+                    rgb_matrix_set_color(index, RGB_PINK);
+                }
             }
-        }
-        break;
-    case QMK_CROSS:
-        rgb_matrix_set_color(index, RGB_PURPLE);
-        break;
-    case QK_BOOT:
-        rgb_matrix_set_color(index, RGB_RED);
-        break;
-    case KC_CAPS:
-        if (led_state->caps_lock) {
+            break;
+        case QMK_CROSS:
+            rgb_matrix_set_color(index, RGB_PURPLE);
+            break;
+        case QK_BOOT:
             rgb_matrix_set_color(index, RGB_RED);
-        }
-        break;
-    case KC_NUM:
-        if (!led_state->num_lock) {
-            rgb_matrix_set_color(index, RGB_OFF);
-        }
-    default: break;
+            break;
+        case KC_CAPS:
+            if (led_state->caps_lock) {
+                rgb_matrix_set_color(index, RGB_RED);
+            }
+            break;
+        case KC_NUM:
+            if (!led_state->num_lock) {
+                rgb_matrix_set_color(index, RGB_OFF);
+            }
+        default:
+            break;
     }
 }
 
@@ -252,4 +254,3 @@ bool rgb_matrix_indicators_advanced_user(uint8_t led_min, uint8_t led_max) {
 
     return false;
 }
-

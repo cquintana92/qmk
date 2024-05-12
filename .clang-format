@@ -5,4 +5,5 @@ IndentWidth: 4
 ColumnLimit: 140
 SpaceAfterCStyleCast: true
 UseCRLF: false
+AllowShortEnumsOnASingleLine: false
 AllowShortFunctionsOnASingleLine: false

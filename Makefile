@@ -8,6 +8,11 @@ QMK_USERNAME:=cquintana92
 .PHONY: default
 default: help
 
+.PHONY: fmt
+fmt: ## Run clang-format
+	@clang-format -style="file" -i ${PROJECT_ROOT}keychronv6/keymap.c
+	@clang-format -style="file" -i ${PROJECT_ROOT}keychronq11/keymap.c
+
 .PHONY: setup
 setup: ## Initial repo setup
 	@ln -sf ${PROJECT_ROOT}keychronv6/ ${QMK_ROOT}/keyboards/keychron/v6/iso_encoder/keymaps/${QMK_USERNAME}
