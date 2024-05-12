@@ -23,9 +23,10 @@
 // clang-format off
 
 enum layers{
-   _LAYER_0,
-   _LAYER_1,
-   _LAYER_MOV,
+    _LAYER_0,
+    _LAYER_1,
+    _LAYER_MOV,
+    _LAYER_IDLE,
 };
 
 enum custom_keycodes {
@@ -73,13 +74,22 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
        _______,         _______,  _______,  _______,  _______,  _______,  _______,   _______,  _______,  _______,  _______,  _______,  _______,    _______,  _______,            _______,
        KC_LSFT,         _______,  _______,  _______,  _______,  _______,  _______,   _______,  _______,  _______,  _______,  _______,  _______,              _______,  _______,
        _______,         _______,  _______,  _______,  _______,            _______,                       _______,            _______,  _______,    _______,  KC_HOME,  _______,  KC_END),
+
+   [_LAYER_IDLE] = LAYOUT_92_iso(
+       _______,         _______,  _______,  _______,  _______,  _______,  _______,   _______,  _______,  _______,  _______,  _______,  _______,    _______,  _______,  _______,  _______,
+       _______,         _______,  _______,  _______,  _______,  _______,  _______,   _______,  _______,  _______,  _______,  _______,  _______,    _______,  _______,            _______,
+       _______,         _______,  _______,  _______,  _______,  _______,  _______,   _______,  _______,  _______,  _______,  _______,  _______,    _______,                      _______,
+       _______,         _______,  _______,  _______,  _______,  _______,  _______,   _______,  _______,  _______,  _______,  _______,  _______,    _______,  _______,            _______,
+       _______,         _______,  _______,  _______,  _______,  _______,  _______,   _______,  _______,  _______,  _______,  _______,  _______,              _______,  _______,
+       _______,         _______,  _______,  _______,  _______,            _______,                       _______,            _______,  _______,    _______,  _______,  _______,  _______),
 };
 
 #if defined(ENCODER_ENABLE) && defined(ENCODER_MAP_ENABLE)
 const uint16_t PROGMEM encoder_map[][NUM_DIRECTIONS][NUM_DIRECTIONS] = {
-   [_LAYER_0]   = { ENCODER_CCW_CW(KC_VOLD, KC_VOLU), ENCODER_CCW_CW(RGB_VAD, RGB_VAI) },
-   [_LAYER_1]   = { ENCODER_CCW_CW(RGB_VAD, RGB_VAI), ENCODER_CCW_CW(RGB_VAD, RGB_VAI) },
-   [_LAYER_MOV] = { ENCODER_CCW_CW(RGB_VAD, RGB_VAI), ENCODER_CCW_CW(RGB_VAD, RGB_VAI) }
+   [_LAYER_0]   =  { ENCODER_CCW_CW(KC_VOLD, KC_VOLU), ENCODER_CCW_CW(RGB_VAD, RGB_VAI) },
+   [_LAYER_1]   =  { ENCODER_CCW_CW(RGB_VAD, RGB_VAI), ENCODER_CCW_CW(RGB_VAD, RGB_VAI) },
+   [_LAYER_MOV] =  { ENCODER_CCW_CW(RGB_VAD, RGB_VAI), ENCODER_CCW_CW(RGB_VAD, RGB_VAI) },
+   [_LAYER_IDLE] = { ENCODER_CCW_CW(RGB_VAD, RGB_VAI), ENCODER_CCW_CW(RGB_VAD, RGB_VAI) },
 };
 #endif // ENCODER_MAP_ENABLE
 
@@ -114,6 +124,35 @@ bool is_current_program_jetbrains(void) {
     }
     return false;
 }
+
+// START: IDLE RGB
+
+static uint16_t idle_timer = 0;
+
+void on_keyboard_event(keyrecord_t* record) {
+    // Update the timer to set the idle time to now + IDLE_TIMEOUT
+    idle_timer = (record->event.time + IDLE_TIMEOUT_MS) | 1;
+
+    // Check if we come from idle
+    if (IS_LAYER_ON(_LAYER_IDLE)) {
+        // We come from idle. Disable layer
+        layer_off(_LAYER_IDLE);
+    }
+}
+
+void on_keyboard_idle(void) {
+    layer_on(_LAYER_IDLE);
+}
+
+void matrix_scan_user(void) {
+  if (idle_timer && timer_expired(timer_read(), idle_timer)) {
+    // If execution reaches here, the keyboard has gone idle.
+    on_keyboard_idle();
+    idle_timer = 0;
+  }
+}
+
+// END: IDLE RGB
 
 // Init function
 void keyboard_post_init_user(void) {
@@ -208,6 +247,8 @@ void on_comment_pressed(bool pressed) {
 }
 
 bool process_record_user(uint16_t keycode, keyrecord_t *record) {
+    on_keyboard_event(record);
+
     uint8_t layer = get_highest_layer(layer_state);
     bool pressed = record->event.pressed;
     switch (keycode) {
@@ -231,7 +272,7 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
         break;
     }
     return true;
-};
+}
 
 // RGB
 void set_key_color(uint8_t layer, led_t* led_state, uint8_t row, uint8_t col, uint8_t index) {
@@ -311,7 +352,28 @@ void set_key_color(uint8_t layer, led_t* led_state, uint8_t row, uint8_t col, ui
     }
 }
 
+static bool is_cycle_set = false;
+static bool is_solid_set = false;
+
+
 bool rgb_matrix_indicators_advanced_user(uint8_t led_min, uint8_t led_max) {
+    // Check if is idle
+    if (IS_LAYER_ON(_LAYER_IDLE)) {
+        if (!is_cycle_set) {
+            rgb_matrix_mode_noeeprom(RGB_MATRIX_CYCLE_LEFT_RIGHT);
+            is_cycle_set = true;
+        }
+        is_solid_set = false;
+        return false;
+    }
+
+    // Is not idle
+    is_cycle_set = false;
+    if (!is_solid_set) {
+        rgb_matrix_mode_noeeprom(RGB_MATRIX_SOLID_COLOR);
+        is_solid_set = true;
+    }
+
     uint8_t layer = get_highest_layer(layer_state);
     led_t led_state = host_keyboard_led_state();
 
