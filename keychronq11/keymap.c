@@ -19,9 +19,6 @@
 
 #include "/usr/share/qmkontext/qmkontext.h"
 
-
-// clang-format off
-
 enum layers{
     _LAYER_0,
     _LAYER_1,
@@ -49,6 +46,8 @@ enum custom_keycodes {
 #define CURRENT_PROGRAM_CLION 4
 #define CURRENT_PROGRAM_SLACK 5
 #define CURRENT_PROGRAM_PHPSTORM 6
+
+// clang-format off
 
 const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
    [_LAYER_0] = LAYOUT_92_iso(
@@ -92,6 +91,8 @@ const uint16_t PROGMEM encoder_map[][NUM_DIRECTIONS][NUM_DIRECTIONS] = {
    [_LAYER_IDLE] = { ENCODER_CCW_CW(RGB_VAD, RGB_VAI), ENCODER_CCW_CW(RGB_VAD, RGB_VAI) },
 };
 #endif // ENCODER_MAP_ENABLE
+
+// clang-format on
 
 void enable_debug_mode(void) {
 #if defined(CONSOLE_ENABLE)
