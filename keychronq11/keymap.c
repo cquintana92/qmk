@@ -130,6 +130,15 @@ bool is_current_program_jetbrains(void) {
 static uint16_t idle_timer = 0;
 
 void on_keyboard_event(keyrecord_t* record) {
+    // Ignore encoder events for idle
+    switch (record->event.type) {
+        case ENCODER_CW_EVENT:
+        case ENCODER_CCW_EVENT:
+            return;
+        default:
+            break;
+    }
+
     // Update the timer to set the idle time to now + IDLE_TIMEOUT
     idle_timer = (record->event.time + IDLE_TIMEOUT_MS) | 1;
 
