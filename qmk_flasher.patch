@@ -1,0 +1,18 @@
+diff --git a/lib/python/qmk/flashers.py b/lib/python/qmk/flashers.py
+index 9ecb5e4b9c..25b9556256 100644
+--- a/lib/python/qmk/flashers.py
++++ b/lib/python/qmk/flashers.py
+@@ -178,7 +178,12 @@ def _flash_dfu_util(details, file):
+         cli.run(['dfu-util', '-a', '0', '-d', f'{details[0]}:{details[1]}', '-D', file], capture_output=False)
+     # STM32, APM32, or GD32V DFU
+     else:
+-        cli.run(['dfu-util', '-a', '0', '-d', f'{details[0]}:{details[1]}', '-s', '0x08000000:leave', '-D', file], capture_output=False)
++        while True:
++            r = cli.run(['dfu-util', '-a', '0', '-d', f'{details[0]}:{details[1]}', '-s', '0x08000000:leave', '-D', file], capture_output=False)
++            if r.returncode == 0:
++                break
++            if r.returncode != 74:
++                print(f"r3 returncode: {r.returncode}")
+ 
+ 
+ def _flash_wb32_dfu_updater(file):
