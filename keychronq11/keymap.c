@@ -16,11 +16,13 @@
 
 #include QMK_KEYBOARD_H
 
-#include "/usr/share/qmkontext/qmkontext.h"
+#include "/usr/local/share/qmkontext/qmkontext.h"
 
 enum layers {
-    _LAYER_0,
-    _LAYER_1,
+    _LAYER_MAC_0,
+    _LAYER_MAC_1,
+    _LAYER_LIN_0,
+    _LAYER_LIN_1,
     _LAYER_MOV,
     _LAYER_IDLE,
 };
@@ -49,15 +51,31 @@ enum custom_keycodes {
 // clang-format off
 
 const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
-   [_LAYER_0] = LAYOUT_92_iso(
+   [_LAYER_MAC_0] = LAYOUT_92_iso(
        KC_MUTE,         KC_ESC,   KC_F1,    KC_F2,    KC_F3,    KC_F4,    KC_F5,     KC_F6,    KC_F7,    KC_F8,    KC_F9,    KC_F10,   KC_F11,       KC_F12,   KC_INS,   KC_DEL,   RGB_TOG,
        MACRO_1,         KC_GRV,   KC_1,     KC_2,     KC_3,     KC_4,     KC_5,      KC_6,     KC_7,     KC_8,     KC_9,     KC_0,     KC_MINS,      KC_EQL,   KC_BSPC,            KC_PGUP,
        MACRO_2,         KC_TAB,   KC_Q,     KC_W,     KC_E,     KC_R,     KC_T,      KC_Y,     KC_U,     KC_I,     KC_O,     KC_P,     KC_LBRC,      KC_RBRC,                      KC_PGDN,
        MACRO_3,         KC_CAPS,  KC_A,     KC_S,     KC_D,     KC_F,     KC_G,      KC_H,     KC_J,     KC_K,     KC_L,     KC_SCLN,  KC_QUOT,      KC_NUHS,  KC_ENT,             KC_HOME,
        MACRO_4,         KC_LSFT,  KC_NUBS,  KC_Z,     KC_X,     KC_C,     KC_V,      KC_B,     KC_N,     KC_M,     KC_COMM,  KC_DOT,   KC_SLSH,                KC_RSFT,  KC_UP,
-       MACRO_5,         KC_LCTL,  KC_LWIN,  KC_LALT,  MO(_LAYER_1),       KC_SPC,                        KC_SPC,             KC_RALT,  MO(_LAYER_1), KC_RCTL,  KC_LEFT,  KC_DOWN,  KC_RGHT),
+       MACRO_5,         KC_LCTL,  KC_LOPT,  KC_LCMD,  MO(_LAYER_MAC_1),   KC_SPC,              KC_SPC,             KC_RALT,  MO(_LAYER_MAC_1), KC_RCTL,        KC_LEFT,  KC_DOWN,  KC_RGHT),
 
-   [_LAYER_1] = LAYOUT_92_iso(
+   [_LAYER_MAC_1] = LAYOUT_92_iso(
+       RGB_TOG,         _______,  KC_BRID,  KC_BRIU,  KC_TASK,  KC_FLXP,  RGB_VAD,   RGB_VAI,  KC_MPRV,  KC_MPLY,  KC_MNXT,  KC_MUTE,  KC_VOLD,    KC_VOLU,  _______,  QK_BOOT,  RGB_TOG,
+       MACRO_1,         _______,  _______,  _______,  _______,  _______,  _______,   KC_PSLS,  _______,  _______,  _______,  _______,  _______,    _______,  _______,            _______,
+       MACRO_2,         RGB_TOG,  RGB_MOD,  RGB_VAI,  RGB_HUI,  RGB_SAI,  RGB_SPI,   _______,  _______,  _______,  _______,  _______,  _______,    _______,                      _______,
+       MACRO_3,         _______,  RGB_RMOD, RGB_VAD,  RGB_HUD,  RGB_SAD,  RGB_SPD,   _______,  _______,  _______,  _______,  _______,  _______,    _______,  _______,            _______,
+       MACRO_4,         _______,  _______,  _______,  _______,  _______,  _______,   _______,  NK_TOGG,  _______,  _______,  _______,  _______,              _______,  _______,
+       QK_BOOT,         _______,  _______,  _______,  _______,            _______,                       _______,            _______,  _______,    _______,  _______,  _______,  _______),
+
+   [_LAYER_LIN_0] = LAYOUT_92_iso(
+       KC_MUTE,         KC_ESC,   KC_F1,    KC_F2,    KC_F3,    KC_F4,    KC_F5,     KC_F6,    KC_F7,    KC_F8,    KC_F9,    KC_F10,   KC_F11,       KC_F12,   KC_INS,   KC_DEL,   RGB_TOG,
+       MACRO_1,         KC_GRV,   KC_1,     KC_2,     KC_3,     KC_4,     KC_5,      KC_6,     KC_7,     KC_8,     KC_9,     KC_0,     KC_MINS,      KC_EQL,   KC_BSPC,            KC_PGUP,
+       MACRO_2,         KC_TAB,   KC_Q,     KC_W,     KC_E,     KC_R,     KC_T,      KC_Y,     KC_U,     KC_I,     KC_O,     KC_P,     KC_LBRC,      KC_RBRC,                      KC_PGDN,
+       MACRO_3,         KC_CAPS,  KC_A,     KC_S,     KC_D,     KC_F,     KC_G,      KC_H,     KC_J,     KC_K,     KC_L,     KC_SCLN,  KC_QUOT,      KC_NUHS,  KC_ENT,             KC_HOME,
+       MACRO_4,         KC_LSFT,  KC_NUBS,  KC_Z,     KC_X,     KC_C,     KC_V,      KC_B,     KC_N,     KC_M,     KC_COMM,  KC_DOT,   KC_SLSH,                KC_RSFT,  KC_UP,
+       MACRO_5,         KC_LCTL,  KC_LWIN,  KC_LALT,  MO(_LAYER_LIN_1),   KC_SPC,              KC_SPC,             KC_RALT,  MO(_LAYER_LIN_1), KC_RCTL,        KC_LEFT,  KC_DOWN,  KC_RGHT),
+
+   [_LAYER_LIN_1] = LAYOUT_92_iso(
        RGB_TOG,         _______,  KC_BRID,  KC_BRIU,  KC_TASK,  KC_FLXP,  RGB_VAD,   RGB_VAI,  KC_MPRV,  KC_MPLY,  KC_MNXT,  KC_MUTE,  KC_VOLD,    KC_VOLU,  _______,  QK_BOOT,  RGB_TOG,
        MACRO_1,         _______,  _______,  _______,  _______,  _______,  _______,   KC_PSLS,  _______,  _______,  _______,  _______,  _______,    _______,  _______,            _______,
        MACRO_2,         RGB_TOG,  RGB_MOD,  RGB_VAI,  RGB_HUI,  RGB_SAI,  RGB_SPI,   _______,  _______,  _______,  _______,  _______,  _______,    _______,                      _______,
@@ -84,8 +102,10 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 
 #if defined(ENCODER_ENABLE) && defined(ENCODER_MAP_ENABLE)
 const uint16_t PROGMEM encoder_map[][NUM_DIRECTIONS][NUM_DIRECTIONS] = {
-   [_LAYER_0]   =  { ENCODER_CCW_CW(KC_VOLD, KC_VOLU), ENCODER_CCW_CW(RGB_VAD, RGB_VAI) },
-   [_LAYER_1]   =  { ENCODER_CCW_CW(RGB_VAD, RGB_VAI), ENCODER_CCW_CW(RGB_VAD, RGB_VAI) },
+   [_LAYER_MAC_0]   =  { ENCODER_CCW_CW(KC_VOLD, KC_VOLU), ENCODER_CCW_CW(RGB_VAD, RGB_VAI) },
+   [_LAYER_MAC_1]   =  { ENCODER_CCW_CW(RGB_VAD, RGB_VAI), ENCODER_CCW_CW(RGB_VAD, RGB_VAI) },
+   [_LAYER_LIN_0]   =  { ENCODER_CCW_CW(KC_VOLD, KC_VOLU), ENCODER_CCW_CW(RGB_VAD, RGB_VAI) },
+   [_LAYER_LIN_1]   =  { ENCODER_CCW_CW(RGB_VAD, RGB_VAI), ENCODER_CCW_CW(RGB_VAD, RGB_VAI) },
    [_LAYER_MOV] =  { ENCODER_CCW_CW(RGB_VAD, RGB_VAI), ENCODER_CCW_CW(RGB_VAD, RGB_VAI) },
    [_LAYER_IDLE] = { ENCODER_CCW_CW(RGB_SPD, RGB_SPI), ENCODER_CCW_CW(RGB_VAD, RGB_VAI) },
 };
@@ -185,18 +205,27 @@ void send_emoji(const char* emoji) {
 void on_m1_pressed(uint8_t layer, bool pressed) {
     switch (layer) {
         // If is on layer 0, enable layer 1
-        case _LAYER_0:
-            layer_on(_LAYER_1);
+        case _LAYER_MAC_0:
+            layer_on(_LAYER_MAC_1);
             break;
         // If is on layer 1, disable layer 1
-        case _LAYER_1:
-            layer_off(_LAYER_1);
+        case _LAYER_MAC_1:
+            layer_off(_LAYER_MAC_1);
+            break;
+
+        // If is on layer 0, enable layer 1
+        case _LAYER_LIN_0:
+            layer_on(_LAYER_LIN_1);
+            break;
+        // If is on layer 1, disable layer 1
+        case _LAYER_LIN_1:
+            layer_off(_LAYER_LIN_1);
             break;
     }
 }
 
 void on_m2_pressed(uint8_t layer, bool pressed) {
-    if (layer != _LAYER_0) return;
+    if (layer != _LAYER_MAC_0 || layer != _LAYER_LIN_0) return;
     switch (current_program) {
         case CURRENT_PROGRAM_ANDROID_STUDIO:
         case CURRENT_PROGRAM_RUST_ROVER:
@@ -215,7 +244,7 @@ void on_m2_pressed(uint8_t layer, bool pressed) {
 }
 
 void on_m3_pressed(uint8_t layer, bool pressed) {
-    if (layer != _LAYER_0) return;
+    if (layer != _LAYER_MAC_0 || layer != _LAYER_LIN_0) return;
     switch (current_program) {
         case CURRENT_PROGRAM_ANDROID_STUDIO:
         case CURRENT_PROGRAM_RUST_ROVER:
@@ -232,7 +261,7 @@ void on_m3_pressed(uint8_t layer, bool pressed) {
 }
 
 void on_m4_pressed(uint8_t layer, bool pressed) {
-    if (layer != _LAYER_0) return;
+    if (layer != _LAYER_MAC_0 || layer != _LAYER_LIN_0) return;
     if (!pressed) return;
     SEND_STRING(SS_LCTL(SS_LSFT(SS_TAP(X_PSCR))));
 }
@@ -240,7 +269,8 @@ void on_m4_pressed(uint8_t layer, bool pressed) {
 void on_m5_pressed(uint8_t layer, bool pressed) {
     switch (layer) {
         // If is on layer 0, enable layer 1
-        case _LAYER_0:
+        case _LAYER_MAC_0:
+		case _LAYER_LIN_0:
             layer_on(_LAYER_MOV);
             break;
         // If is on layer 1, disable layer 1
@@ -304,7 +334,7 @@ void set_key_color(uint8_t layer, led_t* led_state, uint8_t row, uint8_t col, ui
         return;
     }
 
-    if (layer == _LAYER_1) {
+    if (layer == _LAYER_MAC_1) {
         if (keycode > KC_TRNS) {
             rgb_matrix_set_color(index, RGB_GREEN);
         }
@@ -323,7 +353,7 @@ void set_key_color(uint8_t layer, led_t* led_state, uint8_t row, uint8_t col, ui
     // LAYER 0
     switch (keycode) {
         case MACRO_1:
-            if (layer == _LAYER_0) {
+            if (layer == _LAYER_MAC_0 || layer == _LAYER_LIN_0) {
                 if (is_current_program_jetbrains()) {
                     rgb_matrix_set_color(index, RGB_GREEN);
                 } else if (current_program == CURRENT_PROGRAM_SLACK) {
@@ -332,7 +362,7 @@ void set_key_color(uint8_t layer, led_t* led_state, uint8_t row, uint8_t col, ui
             }
             break;
         case MACRO_2:
-            if (layer == _LAYER_0) {
+            if (layer == _LAYER_MAC_0 || layer == _LAYER_LIN_0) {
                 if (is_current_program_jetbrains()) {
                     rgb_matrix_set_color(index, RGB_ORANGE);
                 } else if (current_program == CURRENT_PROGRAM_SLACK) {

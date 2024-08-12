@@ -5,6 +5,8 @@ PROJECT_ROOT := $(dir $(MAKEFILE_PATH))
 QMK_ROOT:=${PROJECT_ROOT}/qmk
 QMK_USERNAME:=cquintana92
 
+QMK_CONF_DIR:="${HOME}/Library/Application Support/qmk"
+
 .PHONY: default
 default: help
 
@@ -22,11 +24,15 @@ setup: ## Initial repo setup
 link-v6: ## Set Keychron V6 as current keyboard
 	@mkdir -p ${HOME}/.config/qmk/
 	@ln -sf ${PROJECT_ROOT}/qmk.v6.ini ${HOME}/.config/qmk/qmk.ini
+	@mkdir -p ${QMK_CONF_DIR}
+	@ln -sf ${PROJECT_ROOT}/qmk.v6.ini ${QMK_CONF_DIR}/qmk.ini
 
 .PHONY: link-q11
 link-q11: ## Set Keychron Q11 as current keyboard
 	@mkdir -p ${HOME}/.config/qmk/
 	@ln -sf ${PROJECT_ROOT}/qmk.q11.ini ${HOME}/.config/qmk/qmk.ini
+	@mkdir -p ${QMK_CONF_DIR}
+	@ln -sf ${PROJECT_ROOT}/qmk.q11.ini ${QMK_CONF_DIR}/qmk.ini
 
 .PHONY: build
 build: ## Build firmware
