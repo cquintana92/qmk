@@ -47,6 +47,7 @@ enum custom_keycodes {
 #define CURRENT_PROGRAM_CLION 4
 #define CURRENT_PROGRAM_SLACK 5
 #define CURRENT_PROGRAM_PHPSTORM 6
+#define CURRENT_PROGRAM_PYCHARM 7
 
 // clang-format off
 
@@ -140,6 +141,7 @@ bool is_current_program_jetbrains(void) {
         case CURRENT_PROGRAM_CLION:
         case CURRENT_PROGRAM_PHPSTORM:
         case CURRENT_PROGRAM_RUST_ROVER:
+        case CURRENT_PROGRAM_PYCHARM:
             return true;
     }
     return false;
@@ -196,6 +198,14 @@ void raw_hid_receive(uint8_t* data, uint8_t length) {
 }
 
 // Macros
+bool is_mac(void) {
+    return IS_LAYER_ON(_LAYER_MAC_0);
+}
+
+bool is_linux(void) {
+    return IS_LAYER_ON(_LAYER_LIN_0);
+}
+
 void send_emoji(const char* emoji) {
     SEND_STRING(SS_LSFT(SS_TAP(X_DOT)));
     send_string(emoji);
@@ -231,8 +241,13 @@ void on_m2_pressed(uint8_t layer, bool pressed) {
         case CURRENT_PROGRAM_RUST_ROVER:
         case CURRENT_PROGRAM_PHPSTORM:
         case CURRENT_PROGRAM_CLION:
+        case CURRENT_PROGRAM_PYCHARM:
             if (pressed) {
-                SEND_STRING(SS_LSFT(SS_TAP(X_F10)));
+                if (is_linux()) {
+                    SEND_STRING(SS_LSFT(SS_TAP(X_F10)));
+                } else if (is_mac()) {
+                    SEND_STRING(SS_LCTL(SS_TAP(X_R)));
+                }
             }
             break;
         case CURRENT_PROGRAM_SLACK:
@@ -249,7 +264,11 @@ void on_m3_pressed(uint8_t layer, bool pressed) {
         case CURRENT_PROGRAM_ANDROID_STUDIO:
         case CURRENT_PROGRAM_RUST_ROVER:
             if (pressed) {
-                SEND_STRING(SS_LSFT(SS_TAP(X_F9)));
+                if (is_linux()) {
+                    SEND_STRING(SS_LSFT(SS_TAP(X_F9)));
+                } else if (is_mac()) {
+                    SEND_STRING(SS_LCTL(SS_TAP(X_D)));
+                }
             }
             break;
         case CURRENT_PROGRAM_SLACK:
@@ -261,16 +280,21 @@ void on_m3_pressed(uint8_t layer, bool pressed) {
 }
 
 void on_m4_pressed(uint8_t layer, bool pressed) {
-    if (layer != _LAYER_MAC_0 || layer != _LAYER_LIN_0) return;
+    if (layer != _LAYER_MAC_0 && layer != _LAYER_LIN_0) return;
     if (!pressed) return;
-    SEND_STRING(SS_LCTL(SS_LSFT(SS_TAP(X_PSCR))));
+
+    if (is_mac()) {
+        SEND_STRING(SS_LCTL(SS_LSFT(SS_LCMD(SS_TAP(X_4)))));
+    } else if (is_linux()) {
+        SEND_STRING(SS_LCTL(SS_LSFT(SS_TAP(X_PSCR))));
+    }
 }
 
 void on_m5_pressed(uint8_t layer, bool pressed) {
     switch (layer) {
         // If is on layer 0, enable layer 1
         case _LAYER_MAC_0:
-		case _LAYER_LIN_0:
+        case _LAYER_LIN_0:
             layer_on(_LAYER_MOV);
             break;
         // If is on layer 1, disable layer 1
@@ -334,7 +358,7 @@ void set_key_color(uint8_t layer, led_t* led_state, uint8_t row, uint8_t col, ui
         return;
     }
 
-    if (layer == _LAYER_MAC_1) {
+    if (layer == _LAYER_MAC_1 || layer == _LAYER_LIN_1) {
         if (keycode > KC_TRNS) {
             rgb_matrix_set_color(index, RGB_GREEN);
         }
