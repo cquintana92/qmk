@@ -14,9 +14,29 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "debug.h"
+#include "rgb_matrix.h"
 #include QMK_KEYBOARD_H
 
+#define QMKENV mac
+
+#if !defined(QMKENV)
+#error "QMKENV is not defined. Please define it as 'linux' or 'mac'."
+#elif (QMKENV != mac) && (QMKENV != linux)
+#error "QMKENV must be defined as either 'mac' or 'linux'."
+#endif
+
+#if (QMKENV == mac)
 #include "/usr/local/share/qmkontext/qmkontext.h"
+#elif (QMKENV == linux)
+#include "/usr/share/qmkontext/qmkontext.h"
+#endif
+
+#if defined(CONSOLE_ENABLE)
+#if defined(COMMAND_ENABLE)
+#include "print.h"
+#endif
+#endif
 
 enum layers {
     _LAYER_MAC_0,
@@ -147,6 +167,21 @@ bool is_current_program_jetbrains(void) {
     return false;
 }
 
+void print_layers_status(void) {
+#if defined(CONSOLE_ENABLE)
+#if defined(COMMAND_ENABLE)
+    dprint("on_keyboard_event: --- LAYERS ---\n");
+    dprintf("on_keyboard_event: _LAYER_MAC_0: %d\n", IS_LAYER_ON(_LAYER_MAC_0));
+    dprintf("on_keyboard_event: _LAYER_MAC_1: %d\n", IS_LAYER_ON(_LAYER_MAC_1));
+    dprintf("on_keyboard_event: _LAYER_LIN_0: %d\n", IS_LAYER_ON(_LAYER_LIN_0));
+    dprintf("on_keyboard_event: _LAYER_LIN_1: %d\n", IS_LAYER_ON(_LAYER_LIN_1));
+    dprintf("on_keyboard_event: _LAYER_MOV: %d\n", IS_LAYER_ON(_LAYER_MOV));
+    dprintf("on_keyboard_event: _LAYER_IDLE: %d\n", IS_LAYER_ON(_LAYER_IDLE));
+    dprint("on_keyboard_event: --- END LAYERS ---\n");
+#endif
+#endif
+}
+
 // START: IDLE RGB
 
 static uint16_t idle_timer = 0;
@@ -167,11 +202,13 @@ void on_keyboard_event(keyrecord_t* record) {
     // Check if we come from idle
     if (IS_LAYER_ON(_LAYER_IDLE)) {
         // We come from idle. Disable layer
+        dprint("on_keyboard_event: IDLE: Disable layer\n");
         layer_off(_LAYER_IDLE);
     }
 }
 
 void on_keyboard_idle(void) {
+    dprint("on_keyboard_idle");
     layer_on(_LAYER_IDLE);
 }
 
@@ -207,6 +244,7 @@ bool is_linux(void) {
 }
 
 void send_emoji(const char* emoji) {
+    dprintf("send_emoji: %s\n", emoji);
     SEND_STRING(SS_LSFT(SS_TAP(X_DOT)));
     send_string(emoji);
     SEND_STRING(SS_LSFT(SS_TAP(X_DOT)));
@@ -244,14 +282,19 @@ void on_m2_pressed(uint8_t layer, bool pressed) {
         case CURRENT_PROGRAM_PYCHARM:
             if (pressed) {
                 if (is_linux()) {
+                    dprint("on_m2_pressed: Linux\n");
                     SEND_STRING(SS_LSFT(SS_TAP(X_F10)));
                 } else if (is_mac()) {
+                    dprint("on_m2_pressed: Mac\n");
                     SEND_STRING(SS_LCTL(SS_TAP(X_R)));
+                } else {
+                    dprint("on_m2_pressed: unknown\n");
                 }
             }
             break;
         case CURRENT_PROGRAM_SLACK:
             if (pressed) {
+                dprint("on_m2_pressed: Slack\n");
                 send_emoji("joy");
             }
             break;
@@ -263,16 +306,20 @@ void on_m3_pressed(uint8_t layer, bool pressed) {
     switch (current_program) {
         case CURRENT_PROGRAM_ANDROID_STUDIO:
         case CURRENT_PROGRAM_RUST_ROVER:
+        case CURRENT_PROGRAM_PHPSTORM:
             if (pressed) {
                 if (is_linux()) {
+                    dprint("on_m3_pressed: Linux\n");
                     SEND_STRING(SS_LSFT(SS_TAP(X_F9)));
                 } else if (is_mac()) {
+                    dprint("on_m3_pressed: Mac\n");
                     SEND_STRING(SS_LCTL(SS_TAP(X_D)));
                 }
             }
             break;
         case CURRENT_PROGRAM_SLACK:
             if (pressed) {
+                dprint("on_m3_pressed: Slack\n");
                 send_emoji("tada");
             }
             break;
@@ -284,8 +331,10 @@ void on_m4_pressed(uint8_t layer, bool pressed) {
     if (!pressed) return;
 
     if (is_mac()) {
+        dprint("on_m4_pressed: Mac\n");
         SEND_STRING(SS_LCTL(SS_LSFT(SS_LCMD(SS_TAP(X_4)))));
     } else if (is_linux()) {
+        dprint("on_m4_pressed: Linux\n");
         SEND_STRING(SS_LCTL(SS_LSFT(SS_TAP(X_PSCR))));
     }
 }
@@ -306,7 +355,13 @@ void on_m5_pressed(uint8_t layer, bool pressed) {
 
 void on_comment_pressed(bool pressed) {
     if (!pressed) return;
-    SEND_STRING(SS_LCTL(SS_TAP(X_PSLS)));
+    if (is_linux()) {
+        dprint("on_comment_pressed: Linux\n");
+        SEND_STRING(SS_LCTL(SS_TAP(X_PSLS)));
+    } else if (is_mac()) {
+        dprint("on_comment_pressed: Mac\n");
+        SEND_STRING(SS_LCMD(SS_TAP(X_PSLS)));
+    }
 }
 
 bool process_record_user(uint16_t keycode, keyrecord_t* record) {
@@ -375,53 +430,65 @@ void set_key_color(uint8_t layer, led_t* led_state, uint8_t row, uint8_t col, ui
     }
 
     // LAYER 0
-    switch (keycode) {
-        case MACRO_1:
-            if (layer == _LAYER_MAC_0 || layer == _LAYER_LIN_0) {
-                if (is_current_program_jetbrains()) {
-                    rgb_matrix_set_color(index, RGB_GREEN);
-                } else if (current_program == CURRENT_PROGRAM_SLACK) {
-                    rgb_matrix_set_color(index, RGB_YELLOW);
+    if (layer == _LAYER_MAC_0 || layer == _LAYER_LIN_0) {
+        switch (keycode) {
+            case MACRO_1:
+                if (layer == _LAYER_MAC_0 || layer == _LAYER_LIN_0) {
+                    if (is_current_program_jetbrains()) {
+                        rgb_matrix_set_color(index, RGB_GREEN);
+                    } else if (current_program == CURRENT_PROGRAM_SLACK) {
+                        rgb_matrix_set_color(index, RGB_YELLOW);
+                    }
                 }
-            }
-            break;
-        case MACRO_2:
-            if (layer == _LAYER_MAC_0 || layer == _LAYER_LIN_0) {
-                if (is_current_program_jetbrains()) {
-                    rgb_matrix_set_color(index, RGB_ORANGE);
-                } else if (current_program == CURRENT_PROGRAM_SLACK) {
-                    rgb_matrix_set_color(index, RGB_PINK);
+                break;
+            case MACRO_2:
+                if (layer == _LAYER_MAC_0 || layer == _LAYER_LIN_0) {
+                    if (is_current_program_jetbrains()) {
+                        rgb_matrix_set_color(index, RGB_ORANGE);
+                    } else if (current_program == CURRENT_PROGRAM_SLACK) {
+                        rgb_matrix_set_color(index, RGB_PINK);
+                    }
                 }
-            }
-            break;
-        case MACRO_3:
-            rgb_matrix_set_color(index, RGB_PURPLE);
-            break;
-        case QK_BOOT:
-            rgb_matrix_set_color(index, RGB_RED);
-            break;
-        case KC_CAPS:
-            if (led_state->caps_lock) {
+                break;
+            case MACRO_3:
+                rgb_matrix_set_color(index, RGB_PURPLE);
+                break;
+            case QK_BOOT:
                 rgb_matrix_set_color(index, RGB_RED);
-            }
-            break;
-        case KC_NUM:
-            if (!led_state->num_lock) {
-                rgb_matrix_set_color(index, RGB_OFF);
-            }
-        default:
-            rgb_matrix_set_color(index, RGB_WHITE);
-            break;
+                break;
+            case KC_CAPS:
+                if (led_state->caps_lock) {
+                    rgb_matrix_set_color(index, RGB_RED);
+                }
+                break;
+            case KC_NUM:
+                if (!led_state->num_lock) {
+                    rgb_matrix_set_color(index, RGB_OFF);
+                }
+            default:
+                rgb_matrix_set_color(index, RGB_WHITE);
+                break;
+        }
     }
 }
 
 static bool is_cycle_set = false;
 static bool is_solid_set = false;
+static bool has_reported_idle = false;
 
 bool rgb_matrix_indicators_advanced_user(uint8_t led_min, uint8_t led_max) {
     // Check if is idle
     if (IS_LAYER_ON(_LAYER_IDLE)) {
+        // START: LOG
+        if (!has_reported_idle) {
+            dprint("rgb_matrix_indicators_advanced_user: _LAYER_IDLE is on\n");
+            has_reported_idle = true;
+        }
+        // END: LOG
+
+        // SET RGB MATRIX MODE
         if (!is_cycle_set) {
+            dprint("rgb_matrix_indicators_advanced_user: setting rgb_matrix_mode_noeeprom RGB_MATRIX_CYCLE_LEFT_RIGHT\n");
             rgb_matrix_mode_noeeprom(RGB_MATRIX_CYCLE_LEFT_RIGHT);
             is_cycle_set = true;
         }
@@ -431,7 +498,10 @@ bool rgb_matrix_indicators_advanced_user(uint8_t led_min, uint8_t led_max) {
 
     // Is not idle
     is_cycle_set = false;
+    has_reported_idle = false;
+
     if (!is_solid_set) {
+        dprint("rgb_matrix_indicators_advanced_user: setting rgb_matrix_mode_noeeprom RGB_MATRIX_SOLID_COLOR\n");
         rgb_matrix_mode_noeeprom(RGB_MATRIX_SOLID_COLOR);
         is_solid_set = true;
     }
