@@ -15,9 +15,28 @@
  */
 
 #include QMK_KEYBOARD_H
+
+#define QMKENV mac
+
+#if !defined(QMKENV)
+#error "QMKENV is not defined. Please define it as 'linux' or 'mac'."
+#elif (QMKENV != mac) && (QMKENV != linux)
+#error "QMKENV must be defined as either 'mac' or 'linux'."
+#endif
+
+#if (QMKENV == mac)
+#include "/usr/local/share/qmkontext/qmkontext.h"
+#elif (QMKENV == linux)
 #include "/usr/share/qmkontext/qmkontext.h"
-#include "action_layer.h"
+#endif
+
+#if defined(CONSOLE_ENABLE)
+#if defined(COMMAND_ENABLE)
 #include "print.h"
+#endif
+#endif
+
+#include "action_layer.h"
 
 enum {
     CURRENT_PROGRAM,
@@ -25,8 +44,10 @@ enum {
 } qmkontext_commands;
 
 enum layers {
-    _LAYER_0,
-    _LAYER_1
+    _LAYER_MAC_0,
+    _LAYER_MAC_1,
+    _LAYER_LIN_0,
+    _LAYER_LIN_1
 };
 
 enum custom_keycodes {
@@ -46,20 +67,37 @@ enum custom_keycodes {
 #define CURRENT_PROGRAM_CLION 4
 #define CURRENT_PROGRAM_SLACK 5
 #define CURRENT_PROGRAM_PHPSTORM 6
+#define CURRENT_PROGRAM_PYCHARM 7
 
 // clang-format off
 
 const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
-    [_LAYER_0] = LAYOUT_iso_110(
-
+    [_LAYER_MAC_0] = LAYOUT_iso_110(
         KC_ESC,   KC_F1,    KC_F2,    KC_F3,    KC_F4,    KC_F5,    KC_F6,   KC_F7,    KC_F8,    KC_F9,    KC_F10,   KC_F11,   KC_F12,   KC_MUTE,  KC_PSCR, KC_SCRL, KC_PAUS,    TG(1),     QMK_TRI,  QMK_SQUAR, QMK_CROSS,
         KC_GRV,   KC_1,     KC_2,     KC_3,     KC_4,     KC_5,     KC_6,    KC_7,     KC_8,     KC_9,     KC_0,     KC_MINS,  KC_EQL,   KC_BSPC,  KC_INS,  KC_HOME, KC_PGUP,    KC_NUM,    KC_PSLS,  KC_PAST,   KC_PMNS,
         KC_TAB,   KC_Q,     KC_W,     KC_E,     KC_R,     KC_T,     KC_Y,    KC_U,     KC_I,     KC_O,     KC_P,     KC_LBRC,  KC_RBRC,            KC_DEL,  KC_END,  KC_PGDN,    KC_P7,     KC_P8,    KC_P9,
         KC_CAPS,  KC_A,     KC_S,     KC_D,     KC_F,     KC_G,     KC_H,    KC_J,     KC_K,     KC_L,     KC_SCLN,  KC_QUOT,  KC_NUHS,  KC_ENT,                                 KC_P4,     KC_P5,    KC_P6,     KC_PPLS,
         KC_LSFT,  KC_NUBS,  KC_Z,     KC_X,     KC_C,     KC_V,     KC_B,    KC_N,     KC_M,     KC_COMM,  KC_DOT,   KC_SLSH,  KC_RSFT,                     KC_UP,               KC_P1,     KC_P2,    KC_P3,
-        KC_LCTL,  KC_LGUI,  KC_LALT,                                KC_SPC,                                KC_RALT,  KC_RGUI,  MO(1),    KC_RCTL,  KC_LEFT, KC_DOWN, KC_RGHT,    KC_P0,               KC_PDOT,   KC_PENT
+        KC_LCTL,  KC_LOPT,  KC_LCMD,                                KC_SPC,                                KC_RALT,  KC_RCMD,  MO(1),    KC_RCTL,  KC_LEFT, KC_DOWN, KC_RGHT,    KC_P0,               KC_PDOT,   KC_PENT
     ),
-    [_LAYER_1] = LAYOUT_iso_110(
+    [_LAYER_MAC_1] = LAYOUT_iso_110(
+        //                                                                                                                                                                          O        TR       SQ         X
+        _______,  KC_BRID,  KC_BRIU,  _______,  _______,  RGB_VAD,  RGB_VAI, KC_MPRV,  KC_MPLY,  KC_MNXT,  KC_MUTE,  KC_VOLD,  KC_VOLU,  RGB_TOG,  _______, _______, RGB_TOG,    _______,   _______,  _______,   QK_BOOT,
+        _______,  _______,  _______,  _______,  _______,  _______,  _______, _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______, _______, _______,    _______,   _______,  _______,   _______,
+        _______,  RGB_MOD,  RGB_VAI,  RGB_HUI,  RGB_SAI,  RGB_SPI,  _______, _______,  _______,  _______,  _______,  _______,  _______,            _______, _______, _______,    _______,   _______,  _______,
+        _______,  RGB_RMOD, RGB_VAD,  RGB_HUD,  RGB_SAD,  RGB_SPD,  _______, _______,  _______,  _______,  _______,  _______,  _______,  _______,                                _______,   _______,  _______,   _______,
+        _______,  _______,  _______,  _______,  _______,  _______,  _______, NK_TOGG,  _______,  _______,  _______,  _______,  _______,                     _______,             _______,   _______,  _______,
+        _______,  _______,  _______,  _______,                      _______,                               _______,  _______,  _______,  _______,  _______, _______, _______,                         _______,   _______
+    ),
+    [_LAYER_LIN_0] = LAYOUT_iso_110(
+        KC_ESC,   KC_F1,    KC_F2,    KC_F3,    KC_F4,    KC_F5,    KC_F6,   KC_F7,    KC_F8,    KC_F9,    KC_F10,   KC_F11,   KC_F12,   KC_MUTE,  KC_PSCR, KC_SCRL, KC_PAUS,    TG(3),     QMK_TRI,  QMK_SQUAR, QMK_CROSS,
+        KC_GRV,   KC_1,     KC_2,     KC_3,     KC_4,     KC_5,     KC_6,    KC_7,     KC_8,     KC_9,     KC_0,     KC_MINS,  KC_EQL,   KC_BSPC,  KC_INS,  KC_HOME, KC_PGUP,    KC_NUM,    KC_PSLS,  KC_PAST,   KC_PMNS,
+        KC_TAB,   KC_Q,     KC_W,     KC_E,     KC_R,     KC_T,     KC_Y,    KC_U,     KC_I,     KC_O,     KC_P,     KC_LBRC,  KC_RBRC,            KC_DEL,  KC_END,  KC_PGDN,    KC_P7,     KC_P8,    KC_P9,
+        KC_CAPS,  KC_A,     KC_S,     KC_D,     KC_F,     KC_G,     KC_H,    KC_J,     KC_K,     KC_L,     KC_SCLN,  KC_QUOT,  KC_NUHS,  KC_ENT,                                 KC_P4,     KC_P5,    KC_P6,     KC_PPLS,
+        KC_LSFT,  KC_NUBS,  KC_Z,     KC_X,     KC_C,     KC_V,     KC_B,    KC_N,     KC_M,     KC_COMM,  KC_DOT,   KC_SLSH,  KC_RSFT,                     KC_UP,               KC_P1,     KC_P2,    KC_P3,
+        KC_LCTL,  KC_LGUI,  KC_LALT,                                KC_SPC,                                KC_RALT,  KC_RGUI,  MO(3),    KC_RCTL,  KC_LEFT, KC_DOWN, KC_RGHT,    KC_P0,               KC_PDOT,   KC_PENT
+    ),
+    [_LAYER_LIN_1] = LAYOUT_iso_110(
         //                                                                                                                                                                          O        TR       SQ         X
         _______,  KC_BRID,  KC_BRIU,  _______,  _______,  RGB_VAD,  RGB_VAI, KC_MPRV,  KC_MPLY,  KC_MNXT,  KC_MUTE,  KC_VOLD,  KC_VOLU,  RGB_TOG,  _______, _______, RGB_TOG,    _______,   _______,  _______,   QK_BOOT,
         _______,  _______,  _______,  _______,  _______,  _______,  _______, _______,  _______,  _______,  _______,  _______,  _______,  _______,  _______, _______, _______,    _______,   _______,  _______,   _______,
@@ -72,12 +110,22 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 
 #if defined(ENCODER_MAP_ENABLE)
 const uint16_t PROGMEM encoder_map[][NUM_ENCODERS][NUM_DIRECTIONS] = {
-    [_LAYER_0] = {ENCODER_CCW_CW(KC_VOLD, KC_VOLU) },
-    [_LAYER_1]   = {ENCODER_CCW_CW(RGB_VAD, RGB_VAI) }
+    [_LAYER_MAC_0] = {ENCODER_CCW_CW(KC_VOLD, KC_VOLU) },
+    [_LAYER_MAC_1]   = {ENCODER_CCW_CW(RGB_VAD, RGB_VAI) },
+    [_LAYER_LIN_0] = {ENCODER_CCW_CW(KC_VOLD, KC_VOLU) },
+    [_LAYER_LIN_1]   = {ENCODER_CCW_CW(RGB_VAD, RGB_VAI) }
 };
 #endif
 
 // clang-format on
+
+bool is_mac(void) {
+    return IS_LAYER_ON(_LAYER_MAC_0);
+}
+
+bool is_linux(void) {
+    return IS_LAYER_ON(_LAYER_LIN_0);
+}
 
 void enable_debug_mode(void) {
 #if defined(CONSOLE_ENABLE)
@@ -106,6 +154,7 @@ bool is_current_program_jetbrains(void) {
         case CURRENT_PROGRAM_CLION:
         case CURRENT_PROGRAM_PHPSTORM:
         case CURRENT_PROGRAM_RUST_ROVER:
+        case CURRENT_PROGRAM_PYCHARM:
             return true;
     }
     return false;
@@ -131,46 +180,54 @@ void send_emoji(const char* emoji) {
 }
 
 void on_triangle_press(uint8_t layer, bool pressed) {
-    if (layer != _LAYER_0) return;
-    switch (current_program) {
-        case CURRENT_PROGRAM_ANDROID_STUDIO:
-        case CURRENT_PROGRAM_RUST_ROVER:
-        case CURRENT_PROGRAM_PHPSTORM:
-        case CURRENT_PROGRAM_CLION:
-            if (pressed) {
-                SEND_STRING(SS_LSFT(SS_TAP(X_F10)));
-            }
-            break;
-        case CURRENT_PROGRAM_SLACK:
-            if (pressed) {
+    if (!pressed) return;
+    if (layer == _LAYER_MAC_0 || layer == _LAYER_LIN_0) {
+        switch (current_program) {
+            case CURRENT_PROGRAM_ANDROID_STUDIO:
+            case CURRENT_PROGRAM_PHPSTORM:
+            case CURRENT_PROGRAM_CLION:
+            case CURRENT_PROGRAM_RUST_ROVER:
+            case CURRENT_PROGRAM_PYCHARM:
+                if (is_mac()) {
+                    SEND_STRING(SS_LCTL(SS_TAP(X_R)));
+                } else if (is_linux()) {
+                    SEND_STRING(SS_LSFT(SS_TAP(X_F10)));
+                }
+                break;
+            case CURRENT_PROGRAM_SLACK:
                 send_emoji("joy");
-            }
-            break;
+                break;
+        }
     }
 }
 
 void on_square_press(uint8_t layer, bool pressed) {
-    if (layer != _LAYER_0) return;
-    switch (current_program) {
-        case CURRENT_PROGRAM_ANDROID_STUDIO:
-        case CURRENT_PROGRAM_PHPSTORM:
-        case CURRENT_PROGRAM_RUST_ROVER:
-            if (pressed) {
-                SEND_STRING(SS_LSFT(SS_TAP(X_F9)));
-            }
-            break;
-        case CURRENT_PROGRAM_SLACK:
-            if (pressed) {
+    if (!pressed) return;
+    if (layer == _LAYER_MAC_0 || layer == _LAYER_LIN_0) {
+        switch (current_program) {
+            case CURRENT_PROGRAM_ANDROID_STUDIO:
+            case CURRENT_PROGRAM_PHPSTORM:
+            case CURRENT_PROGRAM_CLION:
+            case CURRENT_PROGRAM_RUST_ROVER:
+            case CURRENT_PROGRAM_PYCHARM:
+                if (is_mac()) {
+                    SEND_STRING(SS_LCTL(SS_TAP(X_R)));
+                } else if (is_linux()) {
+                    SEND_STRING(SS_LSFT(SS_TAP(X_F9)));
+                }
+                break;
+            case CURRENT_PROGRAM_SLACK:
                 send_emoji("tada");
-            }
-            break;
+                break;
+        }
     }
 }
 
 void on_cross_press(uint8_t layer, bool pressed) {
-    if (layer != _LAYER_0) return;
     if (!pressed) return;
-    SEND_STRING(SS_LCTL(SS_LSFT(SS_TAP(X_PSCR))));
+    if (layer == _LAYER_MAC_0 || layer == _LAYER_LIN_0) {
+        SEND_STRING(SS_LCTL(SS_LSFT(SS_TAP(X_PSCR))));
+    }
 }
 
 bool process_record_user(uint16_t keycode, keyrecord_t* record) {
@@ -195,7 +252,7 @@ void set_key_color(uint8_t layer, led_t* led_state, uint8_t row, uint8_t col, ui
     uint16_t keycode = keymap_key_to_keycode(layer, (keypos_t){col, row});
 
     // If LAYER1 and the key has a keycode, paint it green
-    if (layer == _LAYER_1) {
+    if (layer == _LAYER_MAC_1 || layer == _LAYER_LIN_1) {
         if (keycode > KC_TRNS) {
             rgb_matrix_set_color(index, RGB_GREEN);
         }
@@ -203,7 +260,7 @@ void set_key_color(uint8_t layer, led_t* led_state, uint8_t row, uint8_t col, ui
 
     switch (keycode) {
         case QMK_TRI:
-            if (layer == _LAYER_0) {
+            if (layer == _LAYER_MAC_0 || layer == _LAYER_LIN_0) {
                 if (is_current_program_jetbrains()) {
                     rgb_matrix_set_color(index, RGB_GREEN);
                 } else if (current_program == CURRENT_PROGRAM_SLACK) {
@@ -212,7 +269,7 @@ void set_key_color(uint8_t layer, led_t* led_state, uint8_t row, uint8_t col, ui
             }
             break;
         case QMK_SQUAR:
-            if (layer == _LAYER_0) {
+            if (layer == _LAYER_MAC_0 || layer == _LAYER_LIN_0) {
                 if (is_current_program_jetbrains()) {
                     rgb_matrix_set_color(index, RGB_ORANGE);
                 } else if (current_program == CURRENT_PROGRAM_SLACK) {
