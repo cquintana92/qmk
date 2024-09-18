@@ -225,7 +225,11 @@ void on_square_press(uint8_t layer, bool pressed) {
 
 void on_cross_press(uint8_t layer, bool pressed) {
     if (!pressed) return;
-    if (layer == _LAYER_MAC_0 || layer == _LAYER_LIN_0) {
+    if (is_mac()) {
+        dprint("on_cross_press: Mac\n");
+        SEND_STRING(SS_LCTL(SS_LSFT(SS_LCMD(SS_TAP(X_4)))));
+    } else if (is_linux()) {
+        dprint("on_cross_press: Linux\n");
         SEND_STRING(SS_LCTL(SS_LSFT(SS_TAP(X_PSCR))));
     }
 }
