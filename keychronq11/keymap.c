@@ -273,56 +273,38 @@ void on_m1_pressed(uint8_t layer, bool pressed) {
 }
 
 void on_m2_pressed(uint8_t layer, bool pressed) {
-    if (layer != _LAYER_MAC_0 || layer != _LAYER_LIN_0) return;
-    switch (current_program) {
-        case CURRENT_PROGRAM_ANDROID_STUDIO:
-        case CURRENT_PROGRAM_RUST_ROVER:
-        case CURRENT_PROGRAM_PHPSTORM:
-        case CURRENT_PROGRAM_CLION:
-        case CURRENT_PROGRAM_PYCHARM:
-            if (pressed) {
-                if (is_linux()) {
-                    dprint("on_m2_pressed: Linux\n");
-                    SEND_STRING(SS_LSFT(SS_TAP(X_F10)));
-                } else if (is_mac()) {
-                    dprint("on_m2_pressed: Mac\n");
-                    SEND_STRING(SS_LCTL(SS_TAP(X_R)));
-                } else {
-                    dprint("on_m2_pressed: unknown\n");
-                }
-            }
-            break;
-        case CURRENT_PROGRAM_SLACK:
-            if (pressed) {
-                dprint("on_m2_pressed: Slack\n");
-                send_emoji("joy");
-            }
-            break;
+    if (layer != _LAYER_MAC_0 && layer == _LAYER_LIN_0) return;
+    if (!pressed) return;
+    
+    if (is_current_program_jetbrains()) {
+        if (is_linux()) {
+            dprint("on_m2_pressed: Linux\n");
+            SEND_STRING(SS_LSFT(SS_TAP(X_F10)));
+        } else if (is_mac()) {
+            dprint("on_m2_pressed: Mac\n");
+            SEND_STRING(SS_LCTL(SS_TAP(X_R)));
+        }
+    } else {
+        dprint("on_m2_pressed: Slack\n");
+        send_emoji("joy");
     }
 }
 
 void on_m3_pressed(uint8_t layer, bool pressed) {
-    if (layer != _LAYER_MAC_0 || layer != _LAYER_LIN_0) return;
-    switch (current_program) {
-        case CURRENT_PROGRAM_ANDROID_STUDIO:
-        case CURRENT_PROGRAM_RUST_ROVER:
-        case CURRENT_PROGRAM_PHPSTORM:
-            if (pressed) {
-                if (is_linux()) {
-                    dprint("on_m3_pressed: Linux\n");
-                    SEND_STRING(SS_LSFT(SS_TAP(X_F9)));
-                } else if (is_mac()) {
-                    dprint("on_m3_pressed: Mac\n");
-                    SEND_STRING(SS_LCTL(SS_TAP(X_D)));
-                }
-            }
-            break;
-        case CURRENT_PROGRAM_SLACK:
-            if (pressed) {
-                dprint("on_m3_pressed: Slack\n");
-                send_emoji("tada");
-            }
-            break;
+    if (layer != _LAYER_MAC_0 && layer == _LAYER_LIN_0) return;
+    if (!pressed) return;
+
+    if (is_current_program_jetbrains()) {
+        if (is_linux()) {
+            dprint("on_m3_pressed: Linux\n");
+            SEND_STRING(SS_LSFT(SS_TAP(X_F9)));
+        } else if (is_mac()) {
+            dprint("on_m3_pressed: Mac\n");
+            SEND_STRING(SS_LCTL(SS_TAP(X_D)));
+        }
+    } else {
+        dprint("on_m3_pressed: Slack\n");
+        send_emoji("tada");
     }
 }
 
