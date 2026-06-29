@@ -185,6 +185,44 @@ void print_layers_status(void) {
 // START: IDLE RGB
 
 static uint16_t idle_timer = 0;
+static bool is_idle = false;
+static bool idle_saved_rgb_enable = false;
+static HSV idle_saved_rgb_hsv = {0, 0, 0};
+static led_flags_t idle_saved_rgb_flags = LED_FLAG_ALL;
+
+static void arm_idle_timer(void) {
+    idle_timer = (timer_read() + IDLE_TIMEOUT_MS) | 1;
+}
+
+static void enter_idle(void) {
+    if (is_idle) return;
+
+    dprint("enter_idle: enable idle layer and RGB cycle\n");
+    idle_saved_rgb_enable = rgb_matrix_is_enabled();
+    idle_saved_rgb_hsv = rgb_matrix_get_hsv();
+    idle_saved_rgb_flags = rgb_matrix_get_flags();
+
+    layer_on(_LAYER_IDLE);
+    rgb_matrix_enable_noeeprom();
+    rgb_matrix_set_flags_noeeprom(LED_FLAG_ALL);
+    rgb_matrix_sethsv_noeeprom(RGB_MATRIX_DEFAULT_HUE, RGB_MATRIX_DEFAULT_SAT, RGB_MATRIX_DEFAULT_VAL);
+    rgb_matrix_mode_noeeprom(RGB_MATRIX_CYCLE_LEFT_RIGHT);
+    is_idle = true;
+}
+
+static void exit_idle(void) {
+    if (!is_idle) return;
+
+    dprint("exit_idle: disable idle layer and restore solid RGB\n");
+    layer_off(_LAYER_IDLE);
+    rgb_matrix_set_flags_noeeprom(idle_saved_rgb_flags);
+    rgb_matrix_sethsv_noeeprom(idle_saved_rgb_hsv.h, idle_saved_rgb_hsv.s, idle_saved_rgb_hsv.v);
+    rgb_matrix_mode_noeeprom(RGB_MATRIX_SOLID_COLOR);
+    if (!idle_saved_rgb_enable) {
+        rgb_matrix_disable_noeeprom();
+    }
+    is_idle = false;
+}
 
 void on_keyboard_event(keyrecord_t* record) {
     // Ignore encoder events for idle
@@ -197,19 +235,13 @@ void on_keyboard_event(keyrecord_t* record) {
     }
 
     // Update the timer to set the idle time to now + IDLE_TIMEOUT
-    idle_timer = (record->event.time + IDLE_TIMEOUT_MS) | 1;
-
-    // Check if we come from idle
-    if (IS_LAYER_ON(_LAYER_IDLE)) {
-        // We come from idle. Disable layer
-        dprint("on_keyboard_event: IDLE: Disable layer\n");
-        layer_off(_LAYER_IDLE);
-    }
+    arm_idle_timer();
+    exit_idle();
 }
 
 void on_keyboard_idle(void) {
     dprint("on_keyboard_idle");
-    layer_on(_LAYER_IDLE);
+    enter_idle();
 }
 
 void matrix_scan_user(void) {
@@ -226,6 +258,7 @@ void matrix_scan_user(void) {
 void keyboard_post_init_user(void) {
     enable_debug_mode();
     setup_default_rgb();
+    arm_idle_timer();
     qmkontext_init();
     qmkontext_register_callback(COMMAND_CURRENT_PROGRAM, on_current_program);
 }
@@ -454,38 +487,9 @@ void set_key_color(uint8_t layer, led_t* led_state, uint8_t row, uint8_t col, ui
     }
 }
 
-static bool is_cycle_set = false;
-static bool is_solid_set = false;
-static bool has_reported_idle = false;
-
 bool rgb_matrix_indicators_advanced_user(uint8_t led_min, uint8_t led_max) {
-    // Check if is idle
     if (IS_LAYER_ON(_LAYER_IDLE)) {
-        // START: LOG
-        if (!has_reported_idle) {
-            dprint("rgb_matrix_indicators_advanced_user: _LAYER_IDLE is on\n");
-            has_reported_idle = true;
-        }
-        // END: LOG
-
-        // SET RGB MATRIX MODE
-        if (!is_cycle_set) {
-            dprint("rgb_matrix_indicators_advanced_user: setting rgb_matrix_mode_noeeprom RGB_MATRIX_CYCLE_LEFT_RIGHT\n");
-            rgb_matrix_mode_noeeprom(RGB_MATRIX_CYCLE_LEFT_RIGHT);
-            is_cycle_set = true;
-        }
-        is_solid_set = false;
         return false;
-    }
-
-    // Is not idle
-    is_cycle_set = false;
-    has_reported_idle = false;
-
-    if (!is_solid_set) {
-        dprint("rgb_matrix_indicators_advanced_user: setting rgb_matrix_mode_noeeprom RGB_MATRIX_SOLID_COLOR\n");
-        rgb_matrix_mode_noeeprom(RGB_MATRIX_SOLID_COLOR);
-        is_solid_set = true;
     }
 
     uint8_t layer = get_highest_layer(layer_state);
